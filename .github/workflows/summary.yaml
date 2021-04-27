@@ -1,5 +1,4 @@
-name: "CI"
-
+name: "summary"
 on:
   workflow_dispatch:
     inputs:
@@ -32,7 +31,7 @@ on:
       #   required: true
 
 jobs:
-  ci:
+  summary:
     name: "Terraform CI - Execution"
     runs-on: ubuntu-latest
     steps:
