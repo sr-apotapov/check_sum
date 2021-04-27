@@ -21,9 +21,9 @@ on:
       fmt_logs:
         description: "tf logs output"
         required: true
-      # code_scan_logs:
-      #   description: "code_scan_logs output"
-      #   required: true
+      code_scan_logs:
+        description: "code_scan_logs output"
+        required: true
       policy_exec:
         description: "policy_exec output"
         required: true
@@ -61,6 +61,7 @@ jobs:
             | Check                | Description                                                                               | Status                                                   |
             |----------------------|-------------------------------------------------------------------------------------------|----------------------------------------------------------|
             | Format & Style       | Formatting linter that looks for stylistic issues (i.e. \`tf fmt\`)                       | ${renderOutcome('${{ inputs.fmt_outcome }}')}             |
+            | Code Scan            | Scans Terraform Code using tools such as "terrascan" to look for security or other issues | ${renderOutcome('${{ inputs.code_scan_outcome }}')}       |
             | Initialization       | Terraform Initialization, \`tf init\`                                                     | ${renderOutcome('${{ inputs.init_outcome }}')}            |
             | Plan                 | Terraform Plan, \`tf plan\`                                                               | ${renderOutcome('${{ inputs.plan_outcome }}')}            |
             | Policy Check         | Policies written using Open Policy Agent that are run against the \`tf plan\` output      | ${renderOutcome('${{ inputs.scan_check_outcome }}')}    |
@@ -73,6 +74,17 @@ jobs:
             `.trim();
 
             const text = `
+            #### Terraform - Code Scan (Super Linter)
+
+            View the full **Code Scan** output below.
+
+            <details><summary>Show Results</summary>
+
+             \`\`\`bash
+             ${renderOutput(`${{ inputs.code_scan_logs }}`)}
+             \`\`\`
+
+            </details>
 
             ---
 
