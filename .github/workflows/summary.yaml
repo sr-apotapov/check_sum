@@ -1,0 +1,154 @@
+name: "CI"
+
+on:
+  workflow_dispatch:
+    inputs:
+      github-token: 
+        description: "github token"
+        required: true
+      fmt_outcome:
+        description: "tf fmt result"
+        required: true
+      code_scan_outcome:
+        description: "code scan result"
+        required: true
+      init_outcome:
+        description: "tf init result"
+        required: true
+      plan_outcome:
+        description: "tf plan result"
+        required: true
+      scan_check_outcome:
+        description: "scan check outcome"
+        required: true
+      fmt_logs:
+        description: "tf logs output"
+        required: true
+      code_scan_logs:
+        description: "code_scan_logs output"
+        required: true
+      policy_exec:
+        description: "policy_exec output"
+        required: true
+      plan_logs:
+        description: "tf plan output"
+        required: true
+
+jobs:
+  ci:
+    name: "Terraform CI - Execution"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Github Check Summary
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            function renderOutcome (outcome) {
+              if (outcome === 'success') {
+                return '✅';
+              } else {
+                return '❌';
+              }
+            }
+
+            function renderOutput (output, message = 'No errors') {
+              if (output) {
+                return output;
+              } else {
+                return message;
+              }
+            }
+
+            const summary = `
+            | Check                | Description                                                                               | Status                                                   |
+            |----------------------|-------------------------------------------------------------------------------------------|----------------------------------------------------------|
+            | Format & Style       | Formatting linter that looks for stylistic issues (i.e. \`tf fmt\`)                       | ${renderOutcome('${{ inputs.fmt_outcome }}')}             |
+            | Code Scan            | Scans Terraform Code using tools such as "terrascan" to look for security or other issues | ${renderOutcome('${{ inputs.code_scan_outcome }}')}       |
+            | Initialization       | Terraform Initialization, \`tf init\`                                                     | ${renderOutcome('${{ inputs.init_outcome }}')}            |
+            | Plan                 | Terraform Plan, \`tf plan\`                                                               | ${renderOutcome('${{ inputs.plan_outcome }}')}            |
+            | Policy Check         | Policies written using Open Policy Agent that are run against the \`tf plan\` output      | ${renderOutcome('${{ inputs.scan_check_outcome }}')}    |
+
+            ---
+
+            **Author:** @${{ github.actor }}
+
+            **Latest Commit:** ${{ github.event.pull_request.head.sha }}
+            `.trim();
+
+            const text = `
+            #### Terraform - Code Scan (Super Linter)
+
+            View the full **Code Scan** output below.
+
+            <details><summary>Show Results</summary>
+
+             \`\`\`bash
+             ${renderOutput(`${{ inputs.code_scan_logs }}`)}
+             \`\`\`
+
+            </details>
+
+            ---
+
+            #### Terraform - Format
+
+            View the full **terraform fmt** output below.
+
+            <details><summary>Show Results</summary>
+
+             \`\`\`bash
+             ${renderOutput(`${{ inputs.fmt_logs.content }}`)}
+             \`\`\`
+
+            </details>
+
+            ---
+
+            #### Policy - Check
+
+            View the full \`policy check\` output below.
+
+            <details><summary>Show Results</summary>
+
+             \`\`\`json
+             ${renderOutput(JSON.stringify(JSON.parse('${{ inputs.policy_exec }}'), null, 2))}
+             \`\`\`
+
+            </details>
+
+            ---
+
+            #### Terraform - Plan
+
+            View the full **terraform plan** output below.
+
+            <details><summary>Show Plan</summary>
+
+             \`\`\`bash
+             ${renderOutput(`${{ inputs.plan_logs}}`)}
+             \`\`\`
+
+            </details>
+            `.trim();
+
+            const baseParams = {
+              owner: '${{ github.repository_owner }}',
+              repo: '${{ github.event.repository.name }}',
+            };
+
+            const result = await github.checks.create({
+              head_sha: '${{ github.event.pull_request.head.sha }}',
+              name: 'Terraform CI - Summary',
+              owner: '${{ github.repository_owner }}',
+              repo: '${{ github.event.repository.name }}',
+              conclusion: '${{ job.status }}',
+              output: {
+                title: 'Terraform CI - Summary',
+                text,
+                summary
+              }
+            });
+
+            core.info(JSON.stringify(result.data));
+            core.info(JSON.stringify({ status: result.status, url: result.url }));
