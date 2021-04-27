@@ -18,18 +18,18 @@ on:
       scan_check_outcome:
         description: "scan check outcome"
         required: true
-      fmt_logs:
-        description: "tf logs output"
-        required: true
+      # fmt_logs:
+      #   description: "tf logs output"
+      #   required: true
       # code_scan_logs:
       #   description: "code_scan_logs output"
       #   required: true
       policy_exec:
         description: "policy_exec output"
         required: true
-      plan_logs:
-        description: "tf plan output"
-        required: true
+      # plan_logs:
+      #   description: "tf plan output"
+      #   required: true
 
 jobs:
   ci:
@@ -76,20 +76,6 @@ jobs:
 
             ---
 
-            #### Terraform - Format
-
-            View the full **terraform fmt** output below.
-
-            <details><summary>Show Results</summary>
-
-             \`\`\`bash
-             ${renderOutput(`${{ inputs.fmt_logs.content }}`)}
-             \`\`\`
-
-            </details>
-
-            ---
-
             #### Policy - Check
 
             View the full \`policy check\` output below.
@@ -103,19 +89,6 @@ jobs:
             </details>
 
             ---
-
-            #### Terraform - Plan
-
-            View the full **terraform plan** output below.
-
-            <details><summary>Show Plan</summary>
-
-             \`\`\`bash
-             ${renderOutput(`${{ inputs.plan_logs}}`)}
-             \`\`\`
-
-            </details>
-            `.trim();
 
             const baseParams = {
               owner: '${{ github.repository_owner }}',
