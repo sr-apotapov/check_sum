@@ -2,9 +2,9 @@
 
 import hashlib
 from ansible.module_utils import *
+import sys
 
-
-def main():
+def main(params):
     module = AnsibleModule(argument_spec = dict(string = dict(required=True),))
 
     string = params['string']
@@ -16,4 +16,4 @@ def main():
     module.json(changed=False, original_string=string, md5_hash=md5, sha1_hash=sha1, sha256=sha256, sha512=sha512)
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1])
