@@ -15,11 +15,13 @@
       ansible.builtin.user:
         name: enchilada
         group: food
+        state: present
     - name: Add the user 'redhat' with a specific uid and a primary group of 'redhat'
       ansible.builtin.user:
         name: redhat
         uid: 1500
         group: redhat
+        state: present
     - name: Creates directory
       file:
         path: /data/project/RHT
